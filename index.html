@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Google Calendar API Quickstart</title>
+    <title>Google Calendar API </title>
     <meta charset="utf-8" />
   </head>
   <body>
@@ -10,10 +10,17 @@
     <!--Add buttons to initiate auth sequence and sign out-->
     <button id="authorize_button" style="display: none;">Authorize</button>
     <button id="signout_button" style="display: none;">Sign Out</button>
+    <!--<button id="get_token" onclick="getToken();">Get Token</button>-->
+    <input type="text" value="2020-02-29" placeholder="2020-02-29" id="date_txt"><br/>
+    <input type="text" value="test" placeholder="test" id="title_txt">
+    <br/>
+    <button id="display_event_button" style="display: none;">display Event</button>
     <button id="create_event_button" style="display: none;">Create Event</button>
+    <button id="create_reccuring_event_button" style="display: none;">Create Recurring Event</button>
 
     <pre id="content" style="white-space: pre-wrap;"></pre>
-
+   
+    <div id="list" style="white-space: pre-wrap;"></div>
     <script type="text/javascript">
       // Client ID and API key from the Developer Console
       var CLIENT_ID = '817714937779-vjtvcksvfh1mgskk3h82mjchossb34sh.apps.googleusercontent.com';
@@ -28,7 +35,9 @@
 
       var authorizeButton = document.getElementById('authorize_button');
       var signoutButton = document.getElementById('signout_button');
+      var displayEventButton = document.getElementById('display_event_button');
       var createEventButton = document.getElementById('create_event_button');
+      var createReccuringEventButton = document.getElementById('create_reccuring_event_button');
 
       /**
        *  On load, called to load the auth2 library and API client library.
@@ -55,7 +64,9 @@
           updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
           authorizeButton.onclick = handleAuthClick;
           signoutButton.onclick = handleSignoutClick;
+          displayEventButton.onclick = handledisplayEventClick;
           createEventButton.onclick = handleCreateEventClick;
+          createReccuringEventButton.onclick = handleCreateRecurringEventClick;
         }, function(error) {
           appendPre(JSON.stringify(error, null, 2));
         });
@@ -69,12 +80,16 @@
         if (isSignedIn) {
           authorizeButton.style.display = 'none';
           signoutButton.style.display = 'block';
+          //displayEventButton.style.display = 'block';
           createEventButton.style.display = 'block';
+          createReccuringEventButton.style.display = 'block';
           listUpcomingEvents();
         } else {
           authorizeButton.style.display = 'block';
           signoutButton.style.display = 'none';
+          displayEventButton.style.display = 'none';
           createEventButton.style.display = 'none';
+          createReccuringEventButton.style.display = 'none';
         }
       }
 
@@ -93,84 +108,20 @@
         gapi.auth2.getAuthInstance().signOut();
       }
 
-      /**
-       *  Create Event button click.
-       */
-       function handleCreateEventClick(event) {
-        //alert(0);
-        var event = {
-          'summary': 'test',
-          'location': '800 Howard St., San Francisco, CA 94103',
-          'description': 'A chance to hear more about Google\'s developer products.',
-          'start': {
-            'date': '2020-02-14'
-          },
-          'end': {
-            'date': '2020-02-14'
-          },
-          'attendees': [
-            {'email': 'asmaa@pidge.co'}
-          ],
-          'reminders': {
-            'useDefault': false,
-            'overrides': [
-              {'method': 'email', 'minutes': 24 * 60},
-              {'method': 'popup', 'minutes': 10}
-            ]
-          },
-          "conferenceData": {
-            "entryPoints": [
-            {
-              "entryPointType": "video",
-              "uri": "https://meet.google.com/wix-pvpt-aaj",
-              "label": "meet.google.com/wix-pvpt-njj"
-            },
-            {
-              "entryPointType": "more",
-              "uri": "https://tel.meet/wix-pvpt-njj?pin=1701789652855",
-              "pin": "1701789652855"
-            },
-            {
-              "entryPointType": "phone",
-              "uri": "tel:+44-20-3873-7654",
-              "label": "+44 20 3873 7654",
-              "pin": "6054226"
-            }
-            ],
-            "conferenceSolution": {
-            "key": {
-              "type": "hangoutsMeet"
-            },
-            "name": "Hangouts Meet",
-            "iconUri": "https://lh5.googleusercontent.com/proxy/bWvYBOb7O03a7HK5iKNEAPoUNPEXH1CHZjuOkiqxHx8OtyVn9sZ6Ktl8hfqBNQUUbCDg6T2unnsHx7RSkCyhrKgHcdoosAW8POQJm_ZEvZU9ZfAE7mZIBGr_tDlF8Z_rSzXcjTffVXg3M46v"
-            },
-            "conferenceId": "wix-pvpt-njj",
-            "signature": "ADwwud9tLfjGQPpT7bdP8f3bq3DS"
-          }
-
-        };
-        
-        var request = gapi.client.calendar.events.insert({
-          'calendarId': 'primary',
-          'conferenceDataVersion':1,
-          'sendUpdates': "all",
-          'resource': event
-        });
-        request.execute(function(event) {
-          console.log(event);
-          appendPre('Event created: ' + event.htmlLink);
-        });
-        /*var solution = event.conferenceData.conferenceSolution;
-        var content = document.getElementById("content");
-        var text = document.createTextNode("Join " + solution.name);
-        var icon = document.createElement("img");
-        icon.src = solution.iconUri;
-        content.appendChild(icon);
-        content.appendChild(text);*/
-        listUpcomingEvents();
+      function getDate()
+      {
+        return document.getElementById('date_txt').value;
       }
-
-      /**
+      function getTitle()
+      {
+        return document.getElementById('title_txt').value;
+      }
+      function handledisplayEventClick()
+      {
+        window.location = '/browse.html';
+      }
+    
+        /**
        * Append a pre element to the body containing the given message
        * as its text node. Used to display the results of the API call.
        *
@@ -182,23 +133,18 @@
         pre.appendChild(textContent);
       }
 
-      /**
-       * Print the summary and start datetime/date of the next ten events in
-       * the authorized user's calendar. If no events are found an
-       * appropriate message is printed.
-       */
       function listUpcomingEvents() {
         gapi.client.calendar.events.list({
           'calendarId': 'primary',
           'timeMin': (new Date()).toISOString(),
           'showDeleted': false,
-          'singleEvents': true,
-          'maxResults': 10,
-          'orderBy': 'startTime'
+          'singleEvents': false,
+          'maxResults': 10
+          //'orderBy': 'startTime'
         }).then(function(response) {
           var events = response.result.items;
-          appendPre('Upcoming events:');
-
+          document.getElementById('list').innerHTML='Upcoming events:';
+          var node = document.getElementById('list');
           if (events.length > 0) {
             for (i = 0; i < events.length; i++) {
               var event = events[i];
@@ -206,19 +152,47 @@
               if (!when) {
                 when = event.start.date;
               }
-              appendPre(event.summary + ' (' + when + ')')
+              console.log(event);
+              var li = document.createElement("li");
+              li.appendChild(document.createTextNode(event.summary + ' (' + when + ')'));
+              var button = document.createElement("button");
+              button.innerHTML = "update";
+              li.appendChild(button);
+              button.setAttribute("id",event.id);
+              button.setAttribute("onclick",'javascript:handleUpdateEventClick("'+event.id+'")');
+              node.appendChild(li);
+
+              var button = document.createElement("button");
+              button.innerHTML = "delete";
+              li.appendChild(button);
+              button.setAttribute("id",event.id);
+              button.setAttribute("onclick",'javascript:handleDeleteEventClick("'+event.id+'")');
+              node.appendChild(li);
+              //node.innerHTML +='<a id="'+event.id+'" href="'+event.htmlLink+'">'+event.summary + ' (' + when + ')' +'</a>\n';
+              // node.innerHTML +='<a id="'+event.id+'" href="'+event.htmlLink+'" onclick = "'+showDetails(event.id)+'">'+event.summary + ' (' + when + ')' +'</a>\n';
+              // node.innerHTML +='<button id="'+event.id+'" class="btn-events" onclick = "'+handleUpdateEventClick(event)+'" >'+event.summary + ' (' + when + ')' +'</button>\n';
             }
           } else {
-            appendPre('No upcoming events found.');
+            document.getElementById('list').innerHTML='No upcoming events found.';
           }
         });
       }
-
-    </script>
+  
+    function refreshPage(){
+        window.location.reload();
+    } 
+</script>
+   </script>
 
     <script async defer src="https://apis.google.com/js/api.js"
       onload="this.onload=function(){};handleClientLoad()"
       onreadystatechange="if (this.readyState === 'complete') this.onload()">
     </script>
-  </body>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="create.js"></script>
+    <!-- <script src="browse.js"></script> -->
+    <script src="update.js"></script>
+    <script src="delete.js"></script>
+    <!-- <script src="gettoken.js"></script> -->
+ </body>
 </html>
