@@ -21,6 +21,15 @@ async function getToken()
 }
  function getToken1()
   {
+      //using authorization_code in 
+    //   body: {
+    //     code:'4%2FwgGNrs3WLIp550cRsEBAGexW97BDRHTUaHc7cA1PoedUfzIVc3WpwM7PyESaKFn3CzIbTrMg7Sx5nawZz2pZXk0',
+    //     client_id:'817714937779-vjtvcksvfh1mgskk3h82mjchossb34sh.apps.googleusercontent.com',
+    //     client_secret:'mQzi6Oym5hAdkDNkMMuQyU2r',
+    //     redirect_uri:'http%3A//localhost:8000',
+    //     access_type:'offline',
+    //     grant_type:'password'
+    //   }, // string or object
       const userAction = async () => {
       const response = await fetch('https://oauth2.googleapis.com/token', {
         method: 'POST',

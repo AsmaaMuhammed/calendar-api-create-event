@@ -9,11 +9,11 @@
           'description': 'A chance to hear more about Google\'s developer products.',
 
           "start": {
-          "dateTime": "2020-02-13T09:00:00+02:00",
+          "dateTime": "2020-03-13T09:00:00+02:00",
           "timeZone": "Europe/Zurich"
           },
           "end": {
-          "dateTime": "2020-02-13T10:00:00+02:00",
+          "dateTime": "2020-03-13T10:00:00+02:00",
           "timeZone": "Europe/Zurich"
           },
           "recurrence": [
@@ -145,3 +145,28 @@
           
             window.location.reload();
         }
+
+
+       function createUsingToken()
+       {
+          var request = gapi.client.request({
+            'method': 'POST',
+            'path': '/calendar/v3/calendars/{calendarId}/events/',
+            'params': {'calendarId':'primary'},
+            'body':{
+                'summary': getTitle(),//updated name
+                'location': '800 Howard St., San Francisco, CA 94103',//updated loacation and so on ...
+                'description': 'A chance to hear more about Google\'s developer products.',
+                'start': {
+                  'date': getDate()
+                },
+                'end': {
+                  'date': getDate()
+                }
+              }
+          });
+          request.execute(function(response) {
+            console.log(response);
+          });
+          window.location.reload();
+       } 

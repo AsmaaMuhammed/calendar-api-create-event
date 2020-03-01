@@ -10,17 +10,20 @@
     <!--Add buttons to initiate auth sequence and sign out-->
     <button id="authorize_button" style="display: none;">Authorize</button>
     <button id="signout_button" style="display: none;">Sign Out</button>
-    <!--<button id="get_token" onclick="getToken();">Get Token</button>-->
+    <button id="get_token" onclick="getToken();">Get Token</button>
     <input type="text" value="2020-02-29" placeholder="2020-02-29" id="date_txt"><br/>
     <input type="text" value="test" placeholder="test" id="title_txt">
     <br/>
     <button id="display_event_button" style="display: none;">display Event</button>
     <button id="create_event_button" style="display: none;">Create Event</button>
+    <button id="create_using_token">Create Event Using Token</button>
     <button id="create_reccuring_event_button" style="display: none;">Create Recurring Event</button>
 
     <pre id="content" style="white-space: pre-wrap;"></pre>
    
     <div id="list" style="white-space: pre-wrap;"></div>
+
+
     <script type="text/javascript">
       // Client ID and API key from the Developer Console
       var CLIENT_ID = '817714937779-vjtvcksvfh1mgskk3h82mjchossb34sh.apps.googleusercontent.com';
@@ -37,6 +40,7 @@
       var signoutButton = document.getElementById('signout_button');
       var displayEventButton = document.getElementById('display_event_button');
       var createEventButton = document.getElementById('create_event_button');
+      var createEventTokenButton = document.getElementById('create_using_token');
       var createReccuringEventButton = document.getElementById('create_reccuring_event_button');
 
       /**
@@ -50,6 +54,9 @@
        *  Initializes the API client library and sets up sign-in state
        *  listeners.
        */
+      var gapiAuth = '';
+      var GoogleAuth = '';
+
       function initClient() {
         gapi.client.init({
           apiKey: API_KEY,
@@ -66,12 +73,17 @@
           signoutButton.onclick = handleSignoutClick;
           displayEventButton.onclick = handledisplayEventClick;
           createEventButton.onclick = handleCreateEventClick;
+          createEventTokenButton.onclick = createUsingToken;
           createReccuringEventButton.onclick = handleCreateRecurringEventClick;
+
+
+          gapiAuth = gapi.auth2;
+          GoogleAuth = gapi.auth2.getAuthInstance();
         }, function(error) {
           appendPre(JSON.stringify(error, null, 2));
         });
       }
-
+      
       /**
        *  Called when the signed in status changes, to update the UI
        *  appropriately. After a sign-in, the API is called.
@@ -82,6 +94,7 @@
           signoutButton.style.display = 'block';
           //displayEventButton.style.display = 'block';
           createEventButton.style.display = 'block';
+          createEventTokenButton.style.display = 'block';
           createReccuringEventButton.style.display = 'block';
           listUpcomingEvents();
         } else {
@@ -89,6 +102,7 @@
           signoutButton.style.display = 'none';
           displayEventButton.style.display = 'none';
           createEventButton.style.display = 'none';
+          createEventTokenButton.style.display = 'none';
           createReccuringEventButton.style.display = 'none';
         }
       }
@@ -132,7 +146,19 @@
         var textContent = document.createTextNode(message + '\n');
         pre.appendChild(textContent);
       }
-
+      function listUpcomingEventsWithToken()
+      {
+        var request = gapi.client.request({
+          'method': 'GET',
+          'path': '/calendar/v3/calendars/{calendarId}/events?timeMin='+(new Date()).toISOString()+'&showDeleted=false&singleEvents=false&maxResults=10',
+          'params': {'calendarId':'primary'},
+          'body':{}
+        });
+        // Execute the API request.
+        request.execute(function(response) {
+         
+        });
+      }
       function listUpcomingEvents() {
         gapi.client.calendar.events.list({
           'calendarId': 'primary',
@@ -168,9 +194,20 @@
               button.setAttribute("id",event.id);
               button.setAttribute("onclick",'javascript:handleDeleteEventClick("'+event.id+'")');
               node.appendChild(li);
-              //node.innerHTML +='<a id="'+event.id+'" href="'+event.htmlLink+'">'+event.summary + ' (' + when + ')' +'</a>\n';
-              // node.innerHTML +='<a id="'+event.id+'" href="'+event.htmlLink+'" onclick = "'+showDetails(event.id)+'">'+event.summary + ' (' + when + ')' +'</a>\n';
-              // node.innerHTML +='<button id="'+event.id+'" class="btn-events" onclick = "'+handleUpdateEventClick(event)+'" >'+event.summary + ' (' + when + ')' +'</button>\n';
+              
+              var button = document.createElement("button");
+              button.innerHTML = "update using token";
+              li.appendChild(button);
+              button.setAttribute("id",event.id);
+              button.setAttribute("onclick",'javascript:handleUpdateEventUsingTokenClick("'+event.id+'")');
+              node.appendChild(li);
+
+              var button = document.createElement("button");
+              button.innerHTML = "delete using token";
+              li.appendChild(button);
+              button.setAttribute("id",event.id);
+              button.setAttribute("onclick",'javascript:handleDeleteEventClickUsingTokenClick("'+event.id+'")');
+              node.appendChild(li);
             }
           } else {
             document.getElementById('list').innerHTML='No upcoming events found.';
@@ -193,6 +230,6 @@
     <!-- <script src="browse.js"></script> -->
     <script src="update.js"></script>
     <script src="delete.js"></script>
-    <!-- <script src="gettoken.js"></script> -->
+    <script src="gettoken.js"></script>
  </body>
 </html>
